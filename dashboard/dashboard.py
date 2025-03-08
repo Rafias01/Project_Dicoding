@@ -36,17 +36,24 @@ st.sidebar.text("Email : rafiasubekti@gmail.com")
 st.sidebar.text("Cohort ID : MC009D5Y0612")
 st.sidebar.text("Kelas : MC-52")
 
+# Pastikan tipe data season sesuai
+peminjaman_per_musim["season"] = peminjaman_per_musim["season"].astype(int)
+
 # Filter Data berdasarkan Musim
-filtered_season_data = peminjaman_per_musim[peminjaman_per_musim["season"] == selected_season]
+filtered_season_data = peminjaman_per_musim[peminjaman_per_musim["season"] == int(selected_season)]
 
 # Filter Data berdasarkan Jam
-filtered_hour_data = peminjaman_per_jam[(peminjaman_per_jam["hr"] >= selected_hour[0]) & (peminjaman_per_jam["hr"] <= selected_hour[1])]
+filtered_hour_data = peminjaman_per_jam[
+    (peminjaman_per_jam["hr"] >= selected_hour[0]) & (peminjaman_per_jam["hr"] <= selected_hour[1])
+]
 
 # Visualisasi Peminjaman Berdasarkan Musim
 st.subheader("📌 Banyaknya Penggunaan Sepeda Berdasarkan Musim")
+season_labels = {1: "Semi", 2: "Panas", 3: "Gugur", 4: "Dingin"}
 fig, ax = plt.subplots(figsize=(10, 5))
 sns.barplot(x="season", y="cnt", data=filtered_season_data, palette="coolwarm", legend=False)
-ax.set_xticklabels(["Semi", "Panas", "Gugur", "Dingin"])
+ax.set_xticks(filtered_season_data["season"])
+ax.set_xticklabels([season_labels[s] for s in filtered_season_data["season"]])
 ax.set_xlabel("Musim Peminjaman")
 ax.set_ylabel("Rata-rata Peminjaman Sepeda")
 ax.grid(axis='y')
@@ -62,4 +69,4 @@ ax.set_xticks(range(0, 24))
 ax.grid(True)
 st.pyplot(fig)
 
-st.write("\n**🔍 Keterangan:** Kita bisa memilih musim dan rentang jam untuk melihat tren peminjaman sepeda berdasarkan filter tersebut yang kita pilih.")
+st.write("\n**🔍 Keterangan:** Anda dapat memilih musim dan rentang jam untuk melihat tren peminjaman sepeda berdasarkan filter yang telah dipilih.")
