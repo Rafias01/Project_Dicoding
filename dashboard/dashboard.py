@@ -21,19 +21,18 @@ peminjaman_per_musim = day_df.groupby("season")["cnt"].mean().reset_index()
 # Menghitung total peminjaman sepeda per jam
 peminjaman_per_jam = hour_df.groupby("hr")["cnt"].sum().reset_index()
 
+# Mapping label musim
+season_labels = {1: "Semi", 2: "Panas", 3: "Gugur", 4: "Dingin"}
+peminjaman_per_musim["season_label"] = peminjaman_per_musim["season"].map(season_labels)
+
 # Streamlit App
 st.title("📊 Analisis Peminjaman Sepeda")
 
 # Sidebar untuk filter interaktif
 st.sidebar.header("Filter Data")
-
-# Pilihan musim dengan opsi "All Season"
-season_options = ["All Season", 1, 2, 3, 4]
-selected_season = st.sidebar.selectbox(
-    "Pilih Musim", season_options, format_func=lambda x: "All Season" if x == "All Season" else ["Semi", "Panas", "Gugur", "Dingin"][x-1]
-)
-
-# Pilihan rentang jam
+season_options = ["All Seasons", "Semi", "Panas", "Gugur", "Dingin"]
+season_mapping = {"All Seasons": None, "Semi": 1, "Panas": 2, "Gugur": 3, "Dingin": 4}
+selected_season = st.sidebar.selectbox("Pilih Musim", season_options)
 selected_hour = st.sidebar.slider("Pilih Rentang Jam", 0, 23, (0, 23))
 
 # Menampilkan Identitas di Sidebar
@@ -43,14 +42,11 @@ st.sidebar.text("Email : rafiasubekti@gmail.com")
 st.sidebar.text("Cohort ID : MC009D5Y0612")
 st.sidebar.text("Kelas : MC-52")
 
-# Pastikan tipe data season sesuai
-peminjaman_per_musim["season"] = peminjaman_per_musim["season"].astype(int)
-
 # Filter Data berdasarkan Musim
-if selected_season == "All Season":
-    filtered_season_data = peminjaman_per_musim  # Tampilkan semua musim
+if season_mapping[selected_season] is None:
+    filtered_season_data = peminjaman_per_musim
 else:
-    filtered_season_data = peminjaman_per_musim[peminjaman_per_musim["season"] == int(selected_season)]
+    filtered_season_data = peminjaman_per_musim[peminjaman_per_musim["season"] == season_mapping[selected_season]]
 
 # Filter Data berdasarkan Jam
 filtered_hour_data = peminjaman_per_jam[
@@ -59,21 +55,15 @@ filtered_hour_data = peminjaman_per_jam[
 
 # Visualisasi Peminjaman Berdasarkan Musim
 st.subheader("📌 Banyaknya Penggunaan Sepeda Berdasarkan Musim")
-season_labels = {1: "Semi", 2: "Panas", 3: "Gugur", 4: "Dingin"}
-
 fig, ax = plt.subplots(figsize=(10, 5))
-sns.barplot(x="season", y="cnt", data=filtered_season_data, palette="coolwarm", legend=False)
 
-# Menyesuaikan label sumbu x
-if selected_season == "All Season":
-    ax.set_xticks(filtered_season_data["season"])
-    ax.set_xticklabels([season_labels[s] for s in filtered_season_data["season"]])
-else:
-    ax.set_xticklabels([season_labels[selected_season]])
+sns.barplot(x="season_label", y="cnt",data=filtered_season_data, palette="coolwarm", legend=False)
 
+# Menyesuaikan label sumbu X agar sejajar dengan batang
 ax.set_xlabel("Musim Peminjaman")
 ax.set_ylabel("Rata-rata Peminjaman Sepeda")
 ax.grid(axis='y')
+
 st.pyplot(fig)
 
 # Visualisasi Peminjaman Berdasarkan Jam
@@ -86,4 +76,4 @@ ax.set_xticks(range(0, 24))
 ax.grid(True)
 st.pyplot(fig)
 
-st.write("\n**🔍 Keterangan:** Anda dapat memilih musim dan rentang jam untuk melihat tren peminjaman sepeda berdasarkan filter yang telah dipilih.")
+st.write("\n**🔍 Keterangan:** Kita bisa memilih musim dan rentang jam untuk melihat tren peminjaman sepeda berdasarkan filter yang kita pilih.")
