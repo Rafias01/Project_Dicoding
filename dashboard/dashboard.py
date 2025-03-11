@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
-# load dataset
+# Load dataset
 base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  
 data_path = os.path.join(base_path, "data")
 
-# path lengkap ke file CSV
+# Path lengkap ke file CSV
 path_day = os.path.join(data_path, "day.csv")
 path_hour = os.path.join(data_path, "hour.csv")
 
@@ -26,7 +26,14 @@ st.title("📊 Analisis Peminjaman Sepeda")
 
 # Sidebar untuk filter interaktif
 st.sidebar.header("Filter Data")
-selected_season = st.sidebar.radio("Pilih Musim", [1, 2, 3, 4], format_func=lambda x: ["Semi", "Panas", "Gugur", "Dingin"][x-1])
+
+# Pilihan musim dengan opsi "All Season"
+season_options = ["All Season", 1, 2, 3, 4]
+selected_season = st.sidebar.selectbox(
+    "Pilih Musim", season_options, format_func=lambda x: "All Season" if x == "All Season" else ["Semi", "Panas", "Gugur", "Dingin"][x-1]
+)
+
+# Pilihan rentang jam
 selected_hour = st.sidebar.slider("Pilih Rentang Jam", 0, 23, (0, 23))
 
 # Menampilkan Identitas di Sidebar
@@ -40,7 +47,10 @@ st.sidebar.text("Kelas : MC-52")
 peminjaman_per_musim["season"] = peminjaman_per_musim["season"].astype(int)
 
 # Filter Data berdasarkan Musim
-filtered_season_data = peminjaman_per_musim[peminjaman_per_musim["season"] == int(selected_season)]
+if selected_season == "All Season":
+    filtered_season_data = peminjaman_per_musim  # Tampilkan semua musim
+else:
+    filtered_season_data = peminjaman_per_musim[peminjaman_per_musim["season"] == int(selected_season)]
 
 # Filter Data berdasarkan Jam
 filtered_hour_data = peminjaman_per_jam[
@@ -50,10 +60,17 @@ filtered_hour_data = peminjaman_per_jam[
 # Visualisasi Peminjaman Berdasarkan Musim
 st.subheader("📌 Banyaknya Penggunaan Sepeda Berdasarkan Musim")
 season_labels = {1: "Semi", 2: "Panas", 3: "Gugur", 4: "Dingin"}
+
 fig, ax = plt.subplots(figsize=(10, 5))
 sns.barplot(x="season", y="cnt", data=filtered_season_data, palette="coolwarm", legend=False)
-ax.set_xticks(filtered_season_data["season"])
-ax.set_xticklabels([season_labels[s] for s in filtered_season_data["season"]])
+
+# Menyesuaikan label sumbu x
+if selected_season == "All Season":
+    ax.set_xticks(filtered_season_data["season"])
+    ax.set_xticklabels([season_labels[s] for s in filtered_season_data["season"]])
+else:
+    ax.set_xticklabels([season_labels[selected_season]])
+
 ax.set_xlabel("Musim Peminjaman")
 ax.set_ylabel("Rata-rata Peminjaman Sepeda")
 ax.grid(axis='y')
