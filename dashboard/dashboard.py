@@ -18,8 +18,8 @@ hour_df = pd.read_csv(path_hour)
 # Menghitung rata-rata peminjaman sepeda per musim
 peminjaman_per_musim = day_df.groupby("season")["cnt"].mean().reset_index()
 
-# Menghitung total peminjaman sepeda per jam
-peminjaman_per_jam = hour_df.groupby("hr")["cnt"].sum().reset_index()
+# Menghitung rata-rata peminjaman sepeda per jam
+peminjaman_per_jam = hour_df.groupby("hr")["cnt"].mean().reset_index()
 
 # Mapping label musim
 season_labels = {1: "Semi", 2: "Panas", 3: "Gugur", 4: "Dingin"}
@@ -68,7 +68,7 @@ st.pyplot(fig)
 
 # Visualisasi Peminjaman Berdasarkan Jam
 st.subheader("⏰ Total Peminjaman Sepeda Berdasarkan Jam")
-fig, ax = plt.subplots(figsize=(10, 5))
+fig, ax = plt.subplots(figsize=(10, 8))
 sns.lineplot(x="hr", y="cnt", data=filtered_hour_data, marker="o", color="b")
 ax.set_xlabel("Jam (hr)")
 ax.set_ylabel("Total Peminjaman Sepeda")
